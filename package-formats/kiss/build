@@ -1,0 +1,22 @@
+#!/bin/sh
+#USR_BIN="/usr/local/bin"
+#USR_MAN="/usr/local/share/man/man1"
+
+USR_BIN=$1/usr/bin
+USR_MAN=$1/usr/share/man/man1
+
+#echo 'Installation requires pandoc and will remove any files at the following locations:'
+#printf '\033[31m * %s\033[m\n' "$USR_BIN/pp" "$USR_MAN/pp.1"
+#echo 'and replace them with ones in this repository'
+#echo 'Press Enter to continue... (CTRL-C to abort)'
+#read -r _
+
+#set +x
+#rm -f "$USR_BIN/pp"
+#cp ./pp "$USR_BIN/pp"
+install -Dm755 pp "$USR_BIN/pp"
+
+#rm -f "$USR_MAN/pp.1"
+#mkdir -p -- "$USR_MAN"
+#pandoc --standalone ./pp.1.md --to man >> "$USR_MAN/pp.1"
+install -Dm755 pp.1 "$USR_MAN/pp.1"
