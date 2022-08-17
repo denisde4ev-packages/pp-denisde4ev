@@ -1,5 +1,8 @@
 
-# sel installing script, (optionally) requires only `thepkg`
+# "universal" sel-building package script
+
+* "universal" *will* be able to build for Arch and Alpine build systems
+* requires `thepkg` for option `-i`
 
 ```
 $ USER=root fakeroot ./THEPKGBUILD -i
@@ -30,6 +33,7 @@ Usage: pp v0.3.0(denisde4ev)
 ```
 $ alias sudo='su -c "\"\$@\"" -- root sh'
 $ sudo thepkg del pp-denisde4ev
+Password: 
  -> Removing the pkg 'pp-denisde4ev'...
 removed 'usr/share/man/man1/pp.1'
 removed 'usr/bin/pp'
