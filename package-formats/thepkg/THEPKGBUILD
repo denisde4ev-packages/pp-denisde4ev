@@ -1,0 +1,86 @@
+#!/bin/sh
+
+pkgname=pp-denisde4ev
+unset _pkgver
+unset pkgver
+pkgrel=1
+url=https://github.com/denisde4ev/pp
+pkgdesc='the text preprocessor'
+# arch='any' case :$arch: in *:"$HOSTTYPE":*) ;; *) echo >&2 arch mismatch; exit 2; esac
+license=GPL3
+depends='sh'
+#optdepends=''
+#makedepends='pandoc' # this script is using source from GH released that does not require to build the man pag
+provides='pp'
+#conflicts='' # no known packages for now
+unset source
+sha512sums=SKIP
+
+pkgver() {
+	# wget -O /dev/null -S "https://github.com/$1/releases/latest" 2>&1 | grep -o '^[ \t]*Location.*v[^ ]*' | grep ...
+	curl -s https://api.github.com/repos/denisde4ev/pp/releases/latest | sed -nEe 's/^  "name": "([^"]*)",$/\1/p'
+}
+
+source() {
+	cd "$srcdir"
+
+	# expected url to be something like: https://github.com/denisde4ev/pp/releases/download/v0.3.1/pp-v0.3.1.tar.gz
+	curl -s -L "https://github.com/denisde4ev/pp/releases/download/$_pkgver/pp-$_pkgver.tar.gz" > "pp-$_pkgver.tar.gz"
+	zcat "pp-$_pkgver.tar.gz" | tar -x
+}
+
+package() {
+	cd "$srcdir"
+
+	install -Dm755 pp "$pkgdir/usr/bin/pp"
+	install -Dm755 pp.1 "$pkgdir/usr/share/man/man1/pp.1"
+}
+
+
+case ${0##*/} in
+build.sh|THEPKGBUILD|THEPKGBUILD.sh)
+	set -eu
+	cd "${0%/*}"
+
+	log() {
+		printf ' -> %s\n' >&2 "$@"
+	}
+	runs() {
+		log "$1..."
+		"$@"
+	}
+
+	case $USER in root) ;; *) log "warning!: it recommended to use fakeroot to this buld: use $ USER=root fakeroot ./${0##*/}"; esac
+
+	olddir=$PWD # note: after cd
+	install -d pkg src
+	pkgdir=$PWD/pkg
+	srcdir=$PWD/src
+
+	_pkgver=$(runs pkgver)
+	pkgver=${_pkgver#v}
+	runs source
+	runs package
+
+	cd "$pkgdir"
+	pkgfile=$olddir/$pkgname@$_pkgver${pkgrel+"-$pkgrel"}.tar
+	case $USER in
+		root) runs tar -cf "$pkgfile" -- *;;
+		*)    runs tar --help; exit 5;;
+	esac
+
+	case ${1-} in -*i*)
+		log thepkg...
+		sudo thepkg add "$(basename "$pkgfile" .tar)" < "$pkgfile"
+	esac
+
+# NEVER TESTED:
+#	;;
+#makepkg) eval '
+#	depends=$($depends)
+#	sha512sums=(SKIP)
+#	';;
+#abuild)
+#	pkgver
+#	;;
+esac
