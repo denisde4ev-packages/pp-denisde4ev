@@ -2,7 +2,7 @@
 # "universal" sel-building package script
 
 * "universal" *will* be able to build for Arch and Alpine build systems
-* requires `thepkg` for option `-i`
+* requires [thepkg](https://github.com/denisde4ev/thepkg/) for option `-i`
 
 ```
 $ USER=root fakeroot ./THEPKGBUILD -i
