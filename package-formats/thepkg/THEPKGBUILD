@@ -42,15 +42,11 @@ build.sh|THEPKGBUILD|THEPKGBUILD.sh)
 	set -eu
 	cd "${0%/*}"
 
-	log() {
-		printf ' -> %s\n' >&2 "$@"
-	}
-	runs() {
-		log "$1..."
-		"$@"
-	}
+	log()  { printf ' -> %s\n' >&2 "$@"; }
+	runs() { log "$1..."; "$@"; }
+	die()  { printf ' x> %s\n' >&2 "$1"; exit "${2-2}"; }
 
-	case $USER in root) ;; *) log "warning!: it recommended to use fakeroot to this buld: use $ USER=root fakeroot ./${0##*/}"; esac
+	case $USER in root) ;; *) log "warning!: it recommended to use fakeroot. use: $ USER=root fakeroot ./${0##*/}"; esac
 
 	olddir=$PWD # note: after cd
 	install -d pkg src
@@ -58,6 +54,10 @@ build.sh|THEPKGBUILD|THEPKGBUILD.sh)
 	srcdir=$PWD/src
 
 	_pkgver=$(runs pkgver)
+	case $_pkgver in
+		*["$IFS"]*|'') die "got invalid version: _pkgver='$_pkgver'" 3;;
+		[!v]*|v*[!0-9.-]*) log "got unexpected version: _pkgver='$_pkgver', this might fail";;
+	esac
 	pkgver=${_pkgver#v}
 	runs source
 	runs package
